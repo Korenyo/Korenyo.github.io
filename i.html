@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מחשבון ציוני בגרות - מקיף זילברמן</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a53d0;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2b2d42;
+            --text-muted: #6c757d;
+            --success: #10b981;
+            --fail: #ef233c;
+            --pass: #2b2d42;
+            --border: #e2e8f0;
+            --warning-bg: #fffbeb;
+            --warning-border: #fcd34d;
+            --warning-text: #92400e;
+        }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: var(--card-bg);
+            max-width: 480px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            padding: 30px 25px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        
+        /* ניווט טאבים */
+        .tabs {
+            display: flex;
+            background-color: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 5px;
+        }
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 1rem;
+            margin: 0;
+        }
+        .tab-btn.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            font-weight: 700;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .instructions {
+            background-color: #f8faff;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-right: 4px solid var(--primary);
+            margin-bottom: 20px;
+        }
+        .instructions h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+        .instructions ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+        .instructions li {
+            margin-bottom: 12px;
+        }
+        .instructions li:last-child {
+            margin-bottom: 0;
+        }
+        .instructions a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        .school-notice {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .school-notice span {
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            background-color: #fcfcfc;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        /* כפתור יחידות במתמטיקה */
+        .unit-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .unit-toggle label {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+        .unit-toggle input[type="radio"] {
+            display: none;
+        }
+        .unit-toggle input[type="radio"]:checked + label {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 6px rgba(67, 97, 238, 0.25);
+        }
+
+        .math-section {
+            background-color: #f8faff;
+            border: 1px solid var(--border);
+            padding: 20px 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .math-section h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+            color: var(--primary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        .math-section.optional {
+            background-color: #ffffff;
+            border-style: dashed;
+        }
+
+        button.submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-family: inherit;
+            margin-top: 8px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+        button.submit-btn:active {
+            transform: scale(0.98);
+        }
+        button.submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 24px;
+            background-color: #f8faff;
+            border-radius: 16px;
+            border: 2px dashed var(--border);
+            animation: fadeIn 0.5s ease;
+            margin-top: 10px;
+        }
+        .result-container.active {
+            display: block;
+        }
+        .result-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        .result-score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+        .score-fail { color: var(--fail); }
+        .score-pass { color: var(--pass); }
+        .score-good { color: var(--success); }
+        
+        .calc-explanation {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            background-color: rgba(0,0,0,0.03);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            line-height: 1.4;
+        }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 5px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            line-height: 1.5;
+        }
+        .error {
+            color: var(--fail);
+            font-size: 0.85rem;
+            margin-top: -5px;
+            display: none;
+            font-weight: 500;
+        }
+        .credits {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            text-align: center;
+            margin-top: 10px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>מחשבון ציוני בגרות</h1>
+    
+    <div class="school-notice">
+        <span>בקשה קטנה:</span>
+        אנא השאירו את האתר בתוך כותלי <strong>מקיף זילברמן</strong>. השרתים שלי לא ישרדו...<br>
+        (אלא אם יש מי שרוצה לתרום לי 😉)
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('humanities')">לשון וספרות</button>
+        <button class="tab-btn" onclick="switchTab('math')">מתמטיקה</button>
+    </div>
+
+    <div id="humanities-tab" class="tab-content active">
+        <div class="instructions">
+            <h2>היכן ניתן למצוא את הציונים?</h2>
+            <ul>
+                <li><strong>הערכה חלופית (30%):</strong> יש להתנתק ממערכת משו"ב, להתחבר אליה מחדש ולבחור בשנת הלימודים "תשפ"ה". 
+                    <br>• <em>לשון:</em> תחת "ציונים שוטפים" יש לחפש "הערכה חלופית 30%".
+                    <br>• <em>ספרות:</em> תחת "תעודות" יש לחפש את הציון הסופי בתעודה.
+                </li>
+                <li><strong>מגן וציון בחינה:</strong> ניתן למצוא ב<a href="https://students.education.gov.il/matriculation-exams/grades" target="_blank" rel="noopener noreferrer">פורטל התלמידים</a> או במשו"ב:
+                    <br>• <em>ציון מגן:</em> בשתי המערכות הציון ייקרא <strong>"ציון שנתי"</strong>.
+                    <br>• <em>ציון בחינה:</em> בפורטל התלמידים ייקרא <strong>"ציון בחינה"</strong>, ובמשו"ב ייקרא <strong>"מבחן"</strong>.
+                </li>
+            </ul>
+        </div>
+
+        <form id="calculator-form" onsubmit="calculateHumanities(event)">
+            <div class="form-group">
+                <label for="alt-assessment">ציון הערכה חלופית (30%)</label>
+                <input type="number" id="alt-assessment" min="0" max="100" placeholder="0 - 100" inputmode="numeric" required>
+            </div>
+            <div class="form-group">
+                <label for="magen">ציון הגשה / ציון שנתי (מגן)</label>
+                <input type="number" id="magen" min="0" max="100" placeholder="0 - 100" inputmode="numeric" required>
+            </div>
+            <div class="form-group">
+                <label for="exam">ציון בחינה (משרד החינוך)</label>
+                <input type="number" id="exam" min="0" max="100" placeholder="0 - 100" inputmode="numeric" required>
+            </div>
+
+            <div id="error-msg-hum" class="error">נא לוודא שכל הציונים שהוזנו תקינים (בין 0 ל-100).</div>
+            <button type="submit" class="submit-btn">חשב ציון סופי</button>
+        </form>
+
+        <div id="result-box-hum" class="result-container">
+            <div class="result-title">הציון הסופי המוערך:</div>
+            <div id="final-score-hum" class="result-score">0</div>
+            <div id="calc-explanation-hum" class="calc-explanation"></div>
+        </div>
+    </div>
+
+    <div id="math-tab" class="tab-content">
+        
+        <div class="unit-toggle">
+            <input type="radio" id="unit-5" name="math-units" value="5" checked onchange="updateMathLabels()">
+            <label for="unit-5">5 יח"ל</label>
+            
+            <input type="radio" id="unit-4" name="math-units" value="4" onchange="updateMathLabels()">
+            <label for="unit-4">4 יח"ל</label>
+        </div>
+
+        <form id="math-form" onsubmit="calculateMath(event)">
+            
+            <div class="math-section">
+                <h3 id="math-label-11">שאלון ראשון - י"א - 571</h3>
+                <div class="form-group">
+                    <label for="math-magen-11">ציון מגן (שנתי)</label>
+                    <input type="number" id="math-magen-11" min="0" max="100" placeholder="0 - 100" inputmode="numeric" required>
+                </div>
+                <div class="form-group">
+                    <label for="math-exam-11">ציון בחינה/מבחן</label>
+                    <input type="number" id="math-exam-11" min="0" max="100" placeholder="0 - 100" inputmode="numeric" required>
+                </div>
+            </div>
+
+            <div class="math-section optional">
+                <h3 id="math-label-12">שאלון שני - י"ב - 572 (אופציונלי)</h3>
+                <div class="form-group">
+                    <label for="math-magen-12">ציון מגן (שנתי)</label>
+                    <input type="number" id="math-magen-12" min="0" max="100" placeholder="השאר ריק אם טרם נבחנת" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="math-exam-12">ציון בחינה/מבחן</label>
+                    <input type="number" id="math-exam-12" min="0" max="100" placeholder="השאר ריק אם טרם נבחנת" inputmode="numeric">
+                </div>
+            </div>
+
+            <div id="error-msg-math" class="error">נא לוודא שכל הציונים שהוזנו תקינים (בין 0 ל-100). שים לב שאם התחלת להזין ציוני י"ב, יש להזין גם מגן וגם בחינה.</div>
+            <button type="submit" class="submit-btn">חשב ציון סופי</button>
+        </form>
+
+        <div id="result-box-math" class="result-container">
+            <div class="result-title">הציון הסופי המוערך:</div>
+            <div id="final-score-math" class="result-score">0</div>
+            <div id="calc-explanation-math" class="calc-explanation"></div>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        <strong>הערה חשובה:</strong> כלי זה מספק הערכה בלבד ומיועד לנוחות התלמידים. אין לראות בתוצאת החישוב ציון רשמי ואין למפתחי האתר כל אחריות בגין אי-דיוקים. הציון הקובע הוא זה המפורסם על ידי משרד החינוך.
+    </div>
+    
+    <div class="credits">
+        האתר נבנה ע"י Gemini בעזרת קורן יוסף
+    </div>
+</div>
+
+<script>
+    // --- ניהול הטאבים ---
+    function switchTab(tabName) {
+        // עדכון כפתורים
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // עדכון תוכן
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    // --- עדכון שמות שאלונים במתמטיקה דינמית ---
+    function updateMathLabels() {
+        const is5Units = document.getElementById('unit-5').checked;
+        const label11 = document.getElementById('math-label-11');
+        const label12 = document.getElementById('math-label-12');
+        
+        if (is5Units) {
+            label11.textContent = 'שאלון ראשון - י"א - 571';
+            label12.textContent = 'שאלון שני - י"ב - 572 (אופציונלי)';
+        } else {
+            label11.textContent = 'שאלון ראשון - י"א - 471';
+            label12.textContent = 'שאלון שני - י"ב - 472 (אופציונלי)';
+        }
+    }
+
+    // --- פונקציית עזר לחישוב ציון שאלון בודד (מתמטיקה) ---
+    function calcQuestionnaireGrade(magen, exam) {
+        const higher = Math.max(magen, exam);
+        const lower = Math.min(magen, exam);
+        // 60% לגבוה, 40% לנמוך
+        return (higher * 0.60) + (lower * 0.40);
+    }
+
+    // --- מחשבון מתמטיקה ---
+    function calculateMath(e) {
+        e.preventDefault();
+        
+        const is5Units = document.getElementById('unit-5').checked;
+        const magen11 = parseFloat(document.getElementById('math-magen-11').value);
+        const exam11 = parseFloat(document.getElementById('math-exam-11').value);
+        
+        const magen12Str = document.getElementById('math-magen-12').value;
+        const exam12Str = document.getElementById('math-exam-12').value;
+        const magen12 = parseFloat(magen12Str);
+        const exam12 = parseFloat(exam12Str);
+
+        const errorMsg = document.getElementById('error-msg-math');
+        
+        // ולידציה י"א (חובה)
+        if (isNaN(magen11) || isNaN(exam11) || magen11 < 0 || magen11 > 100 || exam11 < 0 || exam11 > 100) {
+            showError(errorMsg, 'math');
+            return;
+        }
+
+        // בדיקה אם הוזן ציון חלקי של י"ב
+        const isY12PartiallyFilled = (magen12Str !== '' && exam12Str === '') || (magen12Str === '' && exam12Str !== '');
+        if (isY12PartiallyFilled || 
+           (magen12Str !== '' && (magen12 < 0 || magen12 > 100)) || 
+           (exam12Str !== '' && (exam12 < 0 || exam12 > 100))) {
+            showError(errorMsg, 'math');
+            return;
+        }
+
+        errorMsg.style.display = 'none';
+
+        // חישוב שאלון י"א
+        const grade11 = calcQuestionnaireGrade(magen11, exam11);
+        
+        let finalGradeRounded;
+        let explanationText = "";
+
+        // האם הוזנו ציוני י"ב?
+        if (magen12Str !== '' && exam12Str !== '') {
+            // חישוב מלא (י"א + י"ב)
+            const grade12 = calcQuestionnaireGrade(magen12, exam12);
+            let finalGradeRaw;
+            
+            if (is5Units) {
+                finalGradeRaw = (grade11 * 0.60) + (grade12 * 0.40);
+                explanationText = "החישוב בוצע לפי שקלול של <strong>60% י\"א ו-40% י\"ב</strong>.<br>בכל שאלון חושב 60% לציון הגבוה ו-40% לנמוך (מגן מול בחינה).";
+            } else {
+                finalGradeRaw = (grade11 * 0.65) + (grade12 * 0.35);
+                explanationText = "החישוב בוצע לפי שקלול של <strong>65% י\"א ו-35% י\"ב</strong>.<br>בכל שאלון חושב 60% לציון הגבוה ו-40% לנמוך (מגן מול בחינה).";
+            }
+            finalGradeRounded = Math.round(finalGradeRaw);
+        } else {
+            // רק י"א הוזן
+            finalGradeRounded = Math.round(grade11);
+            explanationText = "<strong>שים לב:</strong> הציון שמוצג משקף את <strong>שאלון י\"א בלבד</strong>.<br>בתוך השאלון חושב 60% לציון הגבוה ו-40% לנמוך (מגן מול בחינה).";
+        }
+
+        displayResult(finalGradeRounded, explanationText, 'math');
+    }
+
+    // --- מחשבון לשון וספרות (המקורי) ---
+    function calculateHumanities(e) {
+        e.preventDefault();
+        
+        const altAssessment = parseFloat(document.getElementById('alt-assessment').value);
+        const magen = parseFloat(document.getElementById('magen').value);
+        const exam = parseFloat(document.getElementById('exam').value);
+        const errorMsg = document.getElementById('error-msg-hum');
+
+        if (isNaN(altAssessment) || isNaN(magen) || isNaN(exam) ||
+            altAssessment < 0 || altAssessment > 100 || 
+            magen < 0 || magen > 100 || 
+            exam < 0 || exam > 100) {
+            showError(errorMsg, 'hum');
+            return;
+        }
+
+        errorMsg.style.display = 'none';
+
+        const option1 = (magen * 0.40) + (exam * 0.60);
+        const option2 = (magen * 0.30) + (exam * 0.70);
+        let best70Option;
+        let explanationText;
+        
+        if (option1 > option2) {
+            best70Option = option1;
+            explanationText = "החישוב בוצע לפי <strong>40% מגן ו-60% בחינה</strong><br>(נבחר השקלול הגבוה מבין השניים)";
+        } else if (option2 > option1) {
+            best70Option = option2;
+            explanationText = "החישוב בוצע לפי <strong>30% מגן ו-70% בחינה</strong><br>(נבחר השקלול הגבוה מבין השניים)";
+        } else {
+            best70Option = option1;
+            explanationText = "החישוב בוצע לפי <strong>השקלול הרגיל</strong><br>(שתי חלופות החישוב העניקו תוצאה זהה)";
+        }
+
+        const finalGradeRaw = (altAssessment * 0.30) + (best70Option * 0.70);
+        const finalGradeRounded = Math.round(finalGradeRaw);
+
+        displayResult(finalGradeRounded, explanationText, 'hum');
+    }
+
+    // --- פונקציות עזר גלובליות ---
+    function showError(errorElement, tabType) {
+        errorElement.style.display = 'block';
+        document.getElementById(`result-box-${tabType}`).classList.remove('active');
+    }
+
+    function displayResult(score, explanationText, tabType) {
+        const resultBox = document.getElementById(`result-box-${tabType}`);
+        const finalScoreEl = document.getElementById(`final-score-${tabType}`);
+        const explanationEl = document.getElementById(`calc-explanation-${tabType}`);
+
+        finalScoreEl.textContent = score;
+        explanationEl.innerHTML = explanationText;
+        
+        // איפוס מחלקות הצבע
+        finalScoreEl.className = 'result-score';
+        resultBox.style.borderColor = 'var(--border)';
+        
+        // הגדרת הצבע והקונפטי לפי הציון
+        if (score < 55) {
+            finalScoreEl.classList.add('score-fail');
+            resultBox.style.borderColor = 'var(--fail)';
+        } else if (score <= 84) {
+            finalScoreEl.classList.add('score-pass');
+            resultBox.style.borderColor = 'var(--pass)';
+        } else {
+            finalScoreEl.classList.add('score-good');
+            resultBox.style.borderColor = 'var(--success)';
+            
+            // הפעלת קונפטי לציון 95 ומעלה
+            if (score >= 95) {
+                triggerConfetti();
+            }
+        }
+
+        resultBox.classList.add('active');
+        
+        setTimeout(() => {
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
+    }
+
+    function triggerConfetti() {
+        var duration = 2.5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            var particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+</script>
+</body>
+</html>
